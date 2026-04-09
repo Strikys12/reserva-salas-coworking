@@ -3,7 +3,6 @@ package com.reserva_salas_coworking.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +26,14 @@ public class ReservaController {
     }
 
     @GetMapping("/{id}")
-    public Reserva getById(@PathVariable Long id){
-        return reservaService.getById(id);
+    public ResponseEntity<Reserva> getById(@PathVariable Long id){
+        Reserva reserva = reservaService.getById(id);
+        if (reserva != null) {
+            return ResponseEntity.ok(reserva);
     }
+        return ResponseEntity.notFound().build();
+    }
+
 
 
     @PostMapping
@@ -44,9 +48,27 @@ public class ReservaController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
-    @DeleteMapping
-    public void deleteReserva(@PathVariable Long id) {
-        reservaService.deleteById(id);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateReserva(@PathVariable Long id, @RequestBody Reserva reserva) {
+        try {
+            Reserva reservaActualizada = reservaService.updateReserva(id, reserva);
+            return ResponseEntity.ok(reservaActualizada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteReserva(@PathVariable Long id) {
+        try{
+            reservaService.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        catch(RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+    }
+
+
 }

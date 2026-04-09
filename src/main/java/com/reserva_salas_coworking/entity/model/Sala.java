@@ -35,13 +35,13 @@ public class Sala {
     private String nombre;
 
     @Column(name = "capacidad", nullable = false, length = 30)
-    private String capacidad;
+    private int capacidad;
 
-    @Column(name = "precioHora", nullable = false, length = 10)
-    private double precioHora;
+    @Column(name = "precio_hora", nullable = false, length = 10)
+    private double precio_hora;
 
     @OneToMany(mappedBy = "sala", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Permite serializar esta parte
+    @JsonManagedReference(value = "reserva-sala") // Permite serializar esta parte
     private List<Reserva> reservas = new ArrayList<>();
 
 }

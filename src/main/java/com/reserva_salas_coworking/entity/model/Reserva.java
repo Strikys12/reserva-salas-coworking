@@ -46,12 +46,12 @@ public class Reserva {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sala_id")
-    @JsonBackReference
+    @JsonBackReference(value = "reserva-sala") // Nombre único
     private Sala sala;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
-    @JsonBackReference
+    @JsonBackReference(value = "reserva-usuario") // Nombre único
     private Usuario usuario;
 
 }

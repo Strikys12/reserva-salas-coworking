@@ -7,5 +7,6 @@ import com.reserva_salas_coworking.entity.model.Sala;
 
 @Repository
 public interface SalaRepository extends JpaRepository<Sala, Long> {
+        boolean existsByNombre(String name);
 
 }

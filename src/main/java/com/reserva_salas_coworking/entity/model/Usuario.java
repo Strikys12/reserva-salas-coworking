@@ -35,10 +35,10 @@ public class Usuario {
     private String email;
 
     @Column(name = "esPremium", length = 30)
-    private boolean esPremium;
+    private Boolean esPremium;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Permite serializar esta parte
+    @JsonManagedReference(value = "reserva-usuario") // Permite serializar esta parte
     private List<Reserva> reservas = new ArrayList<>();
 
     public boolean esPremium() {

@@ -54,8 +54,8 @@ public class ReservaService {
 
 
         validarFechaAnterior(reserva.getFecha());
-        validarPremium(totalHoras, usuario); // <-- Aquí le pasas los datos
-        validarDescuento(reserva, totalHoras, usuario, sala); // <-- Y aquí también
+        validarPremium(totalHoras, usuario); //
+        validarDescuento(reserva, totalHoras, usuario, sala);
         validarHorario(reserva);
 
 
@@ -78,7 +78,7 @@ public class ReservaService {
     }
 
     public void validarDescuento(Reserva reserva, double totalHoras, Usuario usuario, Sala sala) {
-        double totalPagar = totalHoras * sala.getPrecioHora();
+        double totalPagar = totalHoras * sala.getPrecio_hora();
 
         if (usuario.esPremium()) {
             reserva.setTotalPagar(totalPagar * 0.85);
@@ -100,9 +100,30 @@ public class ReservaService {
         }
     }
 
-    @DeleteMapping
+    @Transactional
     public void deleteById(Long id) {
         reservaRepository.deleteById(id);
     }
 
+    //Actualizar
+    @Transactional
+    public Reserva updateReserva(Long id, Reserva reserva) {
+        Reserva reservaExistente = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("La reserva con ID " + id + " no existe."));
+
+        // Validar que el nuevo horario no tenga conflictos (si es diferente al actual)
+        if (!reservaExistente.getHoraInicio().equals(reserva.getHoraInicio()) || !reservaExistente.getHoraFin().equals(reserva.getHoraFin())) {
+            validarHorario(reserva);
+        }
+
+
+
+        reservaExistente.setFecha(reserva.getFecha());
+        reservaExistente.setHoraInicio(reserva.getHoraInicio());
+        reservaExistente.setHoraFin(reserva.getHoraFin());
+        reservaExistente.setUsuario(reserva.getUsuario());
+        reservaExistente.setSala(reserva.getSala());
+
+        return reservaRepository.save(reservaExistente);
+    }
 }
