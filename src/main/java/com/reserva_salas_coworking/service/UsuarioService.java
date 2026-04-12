@@ -33,7 +33,7 @@ public class UsuarioService {
     //CreateUsuario
     public Usuario saveUsuario(Usuario usuario) {
         if(usuarioRepository.existsByEmail(usuario.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new RuntimeException("El email ya está registrado!!");
         }
         return usuarioRepository.save(usuario);
     }
