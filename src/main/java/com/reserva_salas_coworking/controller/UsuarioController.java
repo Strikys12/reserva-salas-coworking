@@ -43,7 +43,7 @@ public class UsuarioController {
     }
 
 
-    @PostMapping
+    @PostMapping("/batch")
     public  ResponseEntity<?> createUsuarios(@RequestBody List<Usuario> usuarios) {
         try {
             List<Usuario> nuevoUsuario = usuarioService.saveUsuarios(usuarios);
