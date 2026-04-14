@@ -7,6 +7,7 @@ import com.reserva_salas_coworking.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -30,14 +31,28 @@ public class UsuarioService {
         return usuarioRepository.findById(id).orElse(null);
     }
 
-    //CreateUsuario
-    public Usuario saveUsuario(Usuario usuario) {
-        if(usuarioRepository.existsByEmail(usuario.getEmail())) {
-            throw new RuntimeException("El email ya está registrado!!!");
+
+    public Usuario saveUsuario(Usuario usuario){
+        if(usuarioRepository.existsByEmail(usuario.getEmail())){
+            throw new RuntimeException("El email ya está registrado!!");
         }
         return usuarioRepository.save(usuario);
     }
 
+    //CreateUsuarios
+    @Transactional
+    public List<Usuario> saveUsuarios(List<Usuario> usuarios) {
+
+        for(Usuario u : usuarios){
+            if(usuarioRepository.existsByEmail(u.getEmail())) {
+                throw new RuntimeException("El email ya está registrado!!!");
+            }
+        }
+
+        return usuarioRepository.saveAll(usuarios);
+    }
+
+    @Transactional
     //DeleteUsuario
     public void deleteUsuario(Long id) {
         if (reservaRepository.existsByUsuarioId(id)){

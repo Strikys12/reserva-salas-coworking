@@ -32,10 +32,11 @@ public class UsuarioController {
         }
     }
 
+
     @PostMapping
-    public ResponseEntity<?> createUsuario(@RequestBody Usuario usuario) {
+    public  ResponseEntity<?> createUsuarios(@RequestBody List<Usuario> usuarios) {
         try {
-            Usuario nuevoUsuario = usuarioService.saveUsuario(usuario);
+            List<Usuario> nuevoUsuario = usuarioService.saveUsuarios(usuarios);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
