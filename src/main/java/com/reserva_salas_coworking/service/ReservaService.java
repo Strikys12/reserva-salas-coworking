@@ -40,31 +40,47 @@ public class ReservaService {
 
     //CreateReserva
 
+
     @Transactional
     public Reserva save(Reserva reserva) {
-        // 1. Cálculos y búsquedas iniciales
-        Duration duracion = Duration.between(reserva.getHoraInicio(), reserva.getHoraFin());
-        long minutos = duracion.toMinutes();
-        double totalHoras = minutos / 60.0;
+        // 1. Validar que los datos básicos existan antes de operar
+        if (reserva.getUsuario() == null || reserva.getUsuario().getId() == null) {
+            throw new RuntimeException("Es necesario el ID del usuario.");
+        }
+        if (reserva.getSala() == null || reserva.getSala().getId() == null) {
+            throw new RuntimeException("Es necesario el ID de la sala.");
+        }
+        if (reserva.getHoraInicio() == null || reserva.getHoraFin() == null) {
+            throw new RuntimeException("Las horas de inicio y fin son obligatorias.");
+        }
 
+        // 2. Buscar entidades en la BD (Aquí es donde confirmamos que existen)
         Usuario usuario = usuarioRepository.findById(reserva.getUsuario().getId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuario con ID " + reserva.getUsuario().getId() + " no encontrado"));
+
         Sala sala = salaRepository.findById(reserva.getSala().getId())
-                .orElseThrow(() -> new RuntimeException("Sala no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Sala con ID " + reserva.getSala().getId() + " no encontrada"));
 
+        // 3. Cálculos de tiempo
+        Duration duracion = Duration.between(reserva.getHoraInicio(), reserva.getHoraFin());
+        if (duracion.isNegative() || duracion.isZero()) {
+            throw new RuntimeException("La hora de fin debe ser posterior a la hora de inicio.");
+        }
 
+        double totalHoras = duracion.toMinutes() / 60.0;
+
+        // 4. Ejecutar validaciones de negocio
         validarFechaAnterior(reserva.getFecha());
-        validarPremium(totalHoras, usuario); //
+        validarPremium(totalHoras, usuario);
         validarDescuento(reserva, totalHoras, usuario, sala);
-        validarHorario(reserva);
-
 
         reserva.setUsuario(usuario);
         reserva.setSala(sala);
 
+        validarHorario(reserva);
+
         return reservaRepository.save(reserva);
     }
-
     public void validarFechaAnterior(LocalDate fecha) {
         if (fecha.isBefore(LocalDate.now())) {
             throw new RuntimeException("La fecha de la reserva no puede ser anterior a la fecha actual.");
@@ -91,7 +107,11 @@ public class ReservaService {
     public void validarHorario(Reserva reserva) {
         List<Reserva> reservasExistentes = reservaRepository.findBySalaId(reserva.getSala().getId());
         for (Reserva r : reservasExistentes) {
-            // Solo validamos el horario si es el MISMO día
+            // 1. Ignorar la validación si es la MISMA reserva que estamos editando
+            if (reserva.getId() != null && reserva.getId().equals(r.getId())) {
+                continue;
+            }
+
             if (r.getFecha().equals(reserva.getFecha())) {
                 if (reserva.getHoraInicio().isBefore(r.getHoraFin()) && reserva.getHoraFin().isAfter(r.getHoraInicio())) {
                     throw new RuntimeException("Ya existe una reserva en ese horario para esta sala.");
