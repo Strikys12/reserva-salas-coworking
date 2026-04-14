@@ -32,6 +32,16 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping
+    public ResponseEntity<?> createUsuario(@RequestBody Usuario usuario){
+        try{
+            Usuario nuevoUsuario = usuarioService.saveUsuario(usuario);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+        }catch (RuntimeException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
     @PostMapping
     public  ResponseEntity<?> createUsuarios(@RequestBody List<Usuario> usuarios) {
