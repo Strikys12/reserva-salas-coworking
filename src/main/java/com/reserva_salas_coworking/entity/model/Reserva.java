@@ -5,6 +5,7 @@ import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -46,12 +47,13 @@ public class Reserva {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sala_id")
-    @JsonBackReference(value = "reserva-sala") // Nombre único
+    // Reemplaza @JsonBackReference por esto:
+    @JsonIgnoreProperties({"reservas", "hibernateLazyInitializer", "handler"})
     private Sala sala;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
-    @JsonBackReference(value = "reserva-usuario") // Nombre único
+    // Reemplaza @JsonBackReference por esto:
+    @JsonIgnoreProperties({"reservas", "hibernateLazyInitializer", "handler"})
     private Usuario usuario;
-
 }
