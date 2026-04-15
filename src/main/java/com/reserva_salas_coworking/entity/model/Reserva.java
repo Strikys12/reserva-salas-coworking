@@ -54,6 +54,5 @@ public class Reserva {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     // Reemplaza @JsonBackReference por esto:
-    @JsonIgnoreProperties({"reservas", "hibernateLazyInitializer", "handler"})
     private Usuario usuario;
 }

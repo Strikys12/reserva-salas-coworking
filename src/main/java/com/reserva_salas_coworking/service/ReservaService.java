@@ -88,15 +88,20 @@ public class ReservaService {
     }
 
     public void validarPremium(double totalHoras, Usuario usuario) {
-        if (totalHoras > 4 && !usuario.esPremium()) {
+        // Boolean.TRUE.equals devuelve true SOLO si el valor es true.
+        // Si es false o es null, devuelve false.
+        boolean esPremiumReal = Boolean.TRUE.equals(usuario.getEsPremium());
+
+        if (totalHoras > 4 && !esPremiumReal) {
             throw new RuntimeException("Los usuarios no premium no pueden reservar por más de 4 horas.");
         }
     }
 
+
     public void validarDescuento(Reserva reserva, double totalHoras, Usuario usuario, Sala sala) {
         double totalPagar = totalHoras * sala.getPrecio_hora();
 
-        if (usuario.esPremium()) {
+        if (usuario.getEsPremium() != null && usuario.getEsPremium()) {
             reserva.setTotalPagar(totalPagar * 0.85);
         } else {
             reserva.setTotalPagar(totalPagar);
@@ -127,22 +132,37 @@ public class ReservaService {
 
     //Actualizar
     @Transactional
-    public Reserva updateReserva(Long id, Reserva reserva) {
+    public Reserva updateReserva(Long id, Reserva reservaActualizada) {
         Reserva reservaExistente = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("La reserva con ID " + id + " no existe."));
 
-        // Validar que el nuevo horario no tenga conflictos (si es diferente al actual)
-        if (!reservaExistente.getHoraInicio().equals(reserva.getHoraInicio()) || !reservaExistente.getHoraFin().equals(reserva.getHoraFin())) {
-            validarHorario(reserva);
+        // 1. Volver a buscar Sala y Usuario reales (por si los cambiaron en el JSON)
+        Usuario usuario = usuarioRepository.findById(reservaActualizada.getUsuario().getId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Sala sala = salaRepository.findById(reservaActualizada.getSala().getId())
+                .orElseThrow(() -> new RuntimeException("Sala no encontrada"));
+
+        // 2. Recalcular duración y validar
+        Duration duracion = Duration.between(reservaActualizada.getHoraInicio(), reservaActualizada.getHoraFin());
+        if (duracion.isNegative() || duracion.isZero()) {
+            throw new RuntimeException("La hora de fin debe ser posterior a la de inicio.");
         }
+        double totalHoras = duracion.toMinutes() / 60.0;
 
+        // 3. Ejecutar de nuevo las validaciones de negocio con los nuevos datos
+        validarPremium(totalHoras, usuario);
+        validarDescuento(reservaExistente, totalHoras, usuario, sala); // Aquí actualizamos el totalPagar
 
+        // 4. Validar cruce de horarios
+        reservaActualizada.setId(id); // Para que validarHorario sepa que es la misma
+        validarHorario(reservaActualizada);
 
-        reservaExistente.setFecha(reserva.getFecha());
-        reservaExistente.setHoraInicio(reserva.getHoraInicio());
-        reservaExistente.setHoraFin(reserva.getHoraFin());
-        reservaExistente.setUsuario(reserva.getUsuario());
-        reservaExistente.setSala(reserva.getSala());
+        // 5. Actualizar los campos
+        reservaExistente.setFecha(reservaActualizada.getFecha());
+        reservaExistente.setHoraInicio(reservaActualizada.getHoraInicio());
+        reservaExistente.setHoraFin(reservaActualizada.getHoraFin());
+        reservaExistente.setUsuario(usuario);
+        reservaExistente.setSala(sala);
 
         return reservaRepository.save(reservaExistente);
     }

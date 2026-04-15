@@ -3,6 +3,7 @@ package com.reserva_salas_coworking.entity.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -23,9 +24,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
+
 @AllArgsConstructor
 public class Usuario {
+
+    public Usuario(){
+
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,16 +43,11 @@ public class Usuario {
     private Boolean esPremium;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "reserva-usuario") // Permite serializar esta parte
+    @JsonIgnore
     private List<Reserva> reservas = new ArrayList<>();
 
-    public boolean esPremium() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'esPremium'");
-    }
 
-    public boolean isEsPremium() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+
+
 
 }

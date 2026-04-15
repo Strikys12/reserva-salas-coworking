@@ -75,7 +75,7 @@ public class UsuarioService {
 
         // Actualizar campos
         usuarioExistente.setEmail(usuario.getEmail());
-        usuarioExistente.setEsPremium(usuario.isEsPremium());
+        usuarioExistente.setEsPremium(usuario.getEsPremium());
 
         return usuarioRepository.save(usuarioExistente);
     }
