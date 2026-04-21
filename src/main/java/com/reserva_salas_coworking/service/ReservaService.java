@@ -81,6 +81,8 @@ public class ReservaService {
 
         return reservaRepository.save(reserva);
     }
+
+
     public void validarFechaAnterior(LocalDate fecha) {
         if (fecha.isBefore(LocalDate.now())) {
             throw new RuntimeException("La fecha de la reserva no puede ser anterior a la fecha actual.");
@@ -113,7 +115,7 @@ public class ReservaService {
         List<Reserva> reservasExistentes = reservaRepository.findBySalaId(reserva.getSala().getId());
         for (Reserva r : reservasExistentes) {
             // 1. Ignorar la validación si es la MISMA reserva que estamos editando
-            if (reserva.getId() != null && reserva.getId().equals(r.getId())) {
+            if (reserva.getId   () != null && reserva.getId().equals(r.getId())) {
                 continue;
             }
 

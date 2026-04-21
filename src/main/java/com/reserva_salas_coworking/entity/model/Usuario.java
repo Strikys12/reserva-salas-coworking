@@ -39,6 +39,9 @@ public class Usuario {
     @Column(name = "email", nullable = false, length = 30)
     private String email;
 
+    @Column(name = "contrasena", nullable = false, length = 30)
+    private String contrasena;
+
     @Column(name = "esPremium", length = 30)
     private Boolean esPremium;
 
